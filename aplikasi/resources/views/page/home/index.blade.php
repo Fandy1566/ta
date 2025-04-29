@@ -32,9 +32,25 @@
         {{-- Bagian untuk Masukkan Kode Ruangan --}}
         <div class="px-8 py-6 bg-white shadow-lg rounded-md w-full sm:w-80 flex flex-col gap-4">
             <p class="text-xl font-semibold text-gray-800">Ada kode ruangan? Masukkan di sini!</p>
-            <input class="border-2 border-gray-300 rounded-md p-2 w-full focus:outline-none focus:ring-2 focus:ring-green-500" type="text" name="room_code" id="room_code" placeholder="Masukkan kode ruangan">
-            <button type="submit" class="bg-blue-500 text-white py-2 px-4 rounded-md mt-4 hover:bg-blue-600 transition duration-200">Masukkan Kode</button>
+        
+            <form action="{{ route('room.joinByCode') }}" method="GET" class="flex flex-col gap-4">
+                <input 
+                    class="border-2 border-gray-300 rounded-md p-2 w-full focus:outline-none focus:ring-2 focus:ring-green-500" 
+                    type="text" 
+                    name="room_code" 
+                    id="room_code" 
+                    placeholder="Masukkan kode ruangan" 
+                    required
+                >
+                <button 
+                    type="submit" 
+                    class="bg-blue-500 text-white py-2 px-4 rounded-md mt-2 hover:bg-blue-600 transition duration-200"
+                >
+                    Masukkan Kode
+                </button>
+            </form>
         </div>
+        
         
     </div>
 

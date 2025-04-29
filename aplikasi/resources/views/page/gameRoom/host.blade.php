@@ -18,6 +18,7 @@
                     <tr class="bg-gray-100">
                         <th class="py-2 px-4">Nama</th>
                         <th class="py-2 px-4">Skor</th>
+                        <th class="py-2 px-4">Bantuan</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -25,10 +26,17 @@
                         <tr class="border-t">
                             <td class="py-2 px-4">{{ $player->user->name }}</td>
                             <td class="py-2 px-4">{{ $player->score ?? 0 }}</td>
+                            <td class="py-2 px-4">
+                                @if($player->help)
+                                    <span class="text-red-500 font-semibold">Ya</span>
+                                @else
+                                    <span class="text-gray-400">-</span>
+                                @endif
+                            </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="2" class="py-4 text-center text-gray-500">Belum ada pemain.</td>
+                            <td colspan="3" class="py-4 text-center text-gray-500">Belum ada pemain.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -36,37 +44,121 @@
         </div>
     </div>
 
-    <div class="bg-white shadow-md rounded-lg p-6 flex flex-col gap-4">
+    <div class="bg-white shadow-md rounded-lg p-6 flex flex-col gap-4" x-data="{ showEdit: false, questionId: null, questionText: '', timeLimit: 0 }">
         <h3 class="text-xl font-semibold text-gray-800 mb-4">Setting Soal</h3>
+    
+        @if($room->status === 'waiting')
+            <form action="{{ route('question.store', $room->id) }}" method="POST" class="flex flex-col gap-4">
+                @csrf
+                <div>
+                    <label class="block text-gray-700">Pertanyaan</label>
+                    <input type="text" name="question_text" class="w-full border rounded px-3 py-2" required placeholder="Masukkan Pertanyaan baru">
+                </div>
+                <div>
+                    <label class="block text-gray-700">Waktu (detik)</label>
+                    <input type="number" name="time_limit" class="w-full border rounded px-3 py-2" min="0" placeholder="Masukkan Waktu limit">
+                </div>
+                <button type="submit" class="self-start bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded">
+                    Tambahkan Soal
+                </button>
+            </form>
+        @endif
+    
         @if($questions->isNotEmpty())
-            <ul class="list-disc pl-6">
+            <ul class="list-disc pl-6 mt-4">
                 @foreach($questions as $index => $question)
-                    <li class="mb-4">
-                        <span class="font-semibold">Soal {{ $index + 1 }}:</span> {{ $question->question_text }}
-                        <br>
-                        <span class="text-sm text-gray-500">
-                            Waktu: {{ $question->time_limit ? $question->time_limit . ' detik' : 'Tidak ada limit' }}
-                        </span>
+                    <li class="mb-4 flex justify-between items-start gap-4">
+                        <div>
+                            <span class="font-semibold">Soal {{ $index + 1 }}:</span> {{ $question->question_text }}
+                            <br>
+                            <span class="text-sm text-gray-500">
+                                Waktu: {{ $question->time_limit ? $question->time_limit . ' detik' : 'Tidak ada limit' }}
+                            </span>
+                        </div>
+                        @if($room->status === 'waiting')
+                            <div class="flex gap-2">
+                                <button 
+                                    type="button"
+                                    class="text-blue-500 hover:text-blue-700 text-sm font-semibold"
+                                    @click="showEdit = true; questionId = {{ $question->id }}; questionText = '{{ addslashes($question->question_text) }}'; timeLimit = {{ $question->time_limit ?? 0 }}"
+                                >
+                                    Edit
+                                </button>
+    
+                                <form action="{{ route('question.destroy', $question->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus soal ini?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="text-red-600 hover:text-red-800 text-sm font-semibold">
+                                        Hapus
+                                    </button>
+                                </form>
+                            </div>
+                        @endif
                     </li>
                 @endforeach
             </ul>
-        @else
-            <p class="text-gray-500">Belum ada soal yang ditambahkan.</p>
+        @endif
+    
+        <!-- Modal -->
+        <div 
+            class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+            x-show="showEdit"
+            x-cloak
+        >
+            <div class="bg-white rounded-lg p-6 w-96">
+                <h3 class="text-xl font-bold mb-4">Edit Soal</h3>
+                <form :action="`/question/${questionId}`" method="POST">
+                    @csrf
+                    @method('PUT')
+                    <div class="mb-4">
+                        <label class="block text-gray-700">Pertanyaan</label>
+                        <input type="text" name="question_text" x-model="questionText" class="w-full border rounded px-3 py-2" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700">Waktu (detik)</label>
+                        <input type="number" name="time_limit" x-model="timeLimit" class="w-full border rounded px-3 py-2" min="0">
+                    </div>
+                    <div class="flex justify-end gap-2">
+                        <button type="button" @click="showEdit = false" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded">
+                            Batal
+                        </button>
+                        <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded">
+                            Simpan
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    
+
+    <div class="flex flex-col items-center gap-4 mt-8">
+        @if ($room->status === 'waiting')
+            <form action="{{ route('gameRoom.startGame', $room->id) }}" method="POST">
+                @csrf
+                <button type="submit" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg transition duration-200">
+                    Mulai Game
+                </button>
+            </form>
+        @elseif ($room->status === 'active')
+            <form action="{{ route('gameRoom.finished', $room->id) }}" method="POST">
+                @csrf
+                <button type="submit" class="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-lg transition duration-200">
+                    Selesaikan Room
+                </button>
+            </form>
+        @elseif ($room->status === 'finished')
+            <p class="text-gray-600 text-lg font-semibold">Room telah selesai</p>
+            <a href="{{ route('room.index') }}" class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-200">
+                Kembali ke Home
+            </a>
         @endif
     </div>
-
-    <div class="flex justify-center mt-8">
-        <form action="{{ route('gameRoom.startGame', $room->id) }}" method="POST">
-            @csrf
-            <button type="submit" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg transition duration-200">
-                Mulai Game
-            </button>
-        </form>
-    </div>
+    
 
 </div>
 
-{{-- Javascript Section --}}
 <script>
     function fetchPlayers() {
         const roomId = {{ $room->id }};
@@ -74,9 +166,8 @@
             .then(response => response.json())
             .then(data => {
                 const playersTableBody = document.querySelector('#players-table tbody');
-                playersTableBody.innerHTML = ''; // Clear the table
-
-                // Populate the table with updated player data
+              playersTableBody.innerHTML = '';
+  
                 data.players.forEach(player => {
                     const row = document.createElement('tr');
                     row.classList.add('border-t');
@@ -97,8 +188,7 @@
             });
     }
 
-    // Fetch players every 5 seconds
-    setInterval(fetchPlayers, 5000); // Update every 5 seconds
+    setInterval(fetchPlayers, 5000);
 </script>
 
 @endsection

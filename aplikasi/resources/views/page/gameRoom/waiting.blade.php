@@ -16,13 +16,26 @@
     {{-- List Pemain --}}
     <div class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-4 w-fit mx-auto">
         @forelse ($players as $player)
-            <div class="w-[60px] h-[60px] bg-green-200 flex items-center justify-center rounded-full text-gray-700 text-sm font-semibold shadow-sm">
-                {{ Str::limit($player->user->name, 2, '') }}
+            <div class="flex flex-col items-center">
+                <div class="w-[60px] h-[60px] bg-green-200 flex items-center justify-center rounded-full text-gray-700 text-sm font-semibold shadow-sm">
+                    {{ Str::limit($player->user->name, 2, '') }}
+                </div>
+                <span class="mt-1 text-xs text-gray-700 text-center w-[70px] truncate">
+                    {{ $player->user->name }}
+                </span>
             </div>
         @empty
             <p class="col-span-full text-gray-500">Belum ada pemain bergabung.</p>
         @endforelse
     </div>
+
+    {{-- Tombol Keluar --}}
+    <form action="{{ route('gameRoom.leave', $room->id) }}" method="POST" onsubmit="return confirm('Yakin ingin keluar dari room?')">
+        @csrf
+        <button type="submit" class="mt-8 px-5 py-2 bg-red-500 hover:bg-red-600 text-white text-sm font-semibold rounded-lg shadow">
+            Keluar Room
+        </button>
+    </form>
 
 </div>
 

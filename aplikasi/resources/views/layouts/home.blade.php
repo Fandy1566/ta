@@ -11,45 +11,24 @@
                 {{-- Menu Navigasi --}}
                 <div class="flex items-center gap-8">
                     <a href="{{ route('home.index') }}" class="text-lg font-semibold text-gray-700 hover:text-blue-600 transition duration-200">Home</a>
-                    <a href="{{ route('home.index') }}" class="text-lg font-semibold text-gray-700 hover:text-blue-600 transition duration-200">Room</a>
+                    <a href="{{ route('room.index') }}" class="text-lg font-semibold text-gray-700 hover:text-blue-600 transition duration-200">Room</a>
                     <a href="{{ route('premium') }}" class="text-lg font-semibold text-gray-700 hover:text-blue-600 transition duration-200">Premium</a>
                 </div>
 
                 {{-- Info Pengguna --}}
-                <div class="flex items-center gap-4">
+                <a href="{{ route('profile.edit') }}" class="flex items-center gap-4 hover:bg-gray-100 px-2 py-1 rounded transition duration-200">
                     <div class="flex flex-col text-end">
                         <p class="text-md font-semibold text-gray-800">
-                            @php
-                                if (Auth::user()) {
-                                    echo Auth::user()->name;
-                                } else {
-                                    echo 'Tamu';
-                                }
-                                
-                            @endphp
+                            {{ Auth::user()->name ?? 'Tamu' }}
                         </p>
-                        @php
-                            if (Auth::user()) {
-                                echo Auth::user()->is_premium() ?
-                                    '<p class="text-sm text-yellow-500">
-                                        Premium
-                                    </p>'
-                                :
-                                    '<p class="text-sm text-yellow-800">
-                                        Bronze
-                                    </p>';
-                            } else {
-                                echo'<p class="text-sm text-yellow-800">
-                                        Bronze
-                                    </p>';
-                            }
-                        @endphp
-
+                        <p class="text-sm {{ Auth::user()?->is_premium() ? 'text-yellow-500' : 'text-yellow-800' }}">
+                            {{ Auth::user()?->is_premium() ? 'Premium' : 'Bronze' }}
+                        </p>
                     </div>
                     <div class="w-12 h-12 bg-green-200 flex items-center justify-center rounded-full text-gray-700 text-sm font-semibold shadow-sm">
                         {{ Str::limit(Auth::user()->name ?? 'Tamu', 2, '') }}
                     </div>
-                </div>
+                </a>
             </div>
         </header>
 

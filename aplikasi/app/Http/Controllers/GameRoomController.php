@@ -162,9 +162,9 @@ class GameRoomController extends Controller
         return redirect()->back()->with('success', 'Game room berhasil dihapus');
     }
 
-    public function join(Request $request, $roomId)
+    public function join($roomId)
     {
-        $userId = $request->user_id ?? Auth::id();
+        $userId = Auth::id();
     
         $room = GameRoom::findOrFail($roomId);
         $user = User::findOrFail($userId);
@@ -199,7 +199,24 @@ class GameRoomController extends Controller
         }
 
         return redirect()->route('gameRoom.waiting', ['id' => $room->id]);
-    }    
+    }
+    
+    public function leave($roomId)
+    {
+        $userId = Auth::id();
+        $room = GameRoom::findOrFail($roomId);
+
+        $roomUser = GameRoomUser::where('game_room_id', $roomId)
+            ->where('user_id', $userId)
+            ->first();
+
+        if ($roomUser) {
+            $roomUser->delete();
+            $room->decrement('current_players');
+        }
+
+        return redirect()->route('home.index')->with('success', 'Kamu telah keluar dari room.');
+    }
 
     public function host($id)
     {
@@ -239,4 +256,19 @@ class GameRoomController extends Controller
             'status' => $room->status
         ]);
     }
+
+    public function finishGame($id)
+    {
+        $room = GameRoom::findOrFail($id);
+
+        if (Auth::id() !== $room->host_user_id) {
+            return redirect()->back()->with('error', 'Anda tidak memiliki izin untuk menyelesaikan game ini.');
+        }
+
+        $room->status = 'finished';
+        $room->save();
+
+        return redirect()->route('gameRoom.host', $room->id)->with('success', 'Game telah diselesaikan.');
+    }
+
 }

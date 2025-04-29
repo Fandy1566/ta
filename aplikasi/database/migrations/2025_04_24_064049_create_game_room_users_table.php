@@ -18,6 +18,7 @@ return new class extends Migration
             $table->integer('score')->default(0);
             $table->smallInteger('correct')->default(0);
             $table->smallInteger('wrong')->default(0);
+            $table->boolean('help')->default(false);
             
             $table->foreign('game_room_id')->references('id')->on('game_rooms')->onDelete('cascade');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');

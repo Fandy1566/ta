@@ -21,10 +21,10 @@
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                 <p class="text-gray-700">Membuat room private</p>
             </div>
-            {{-- <div class="flex items-center gap-3">
+            <div class="flex items-center gap-3">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                <p class="text-gray-700">Room dengan sistem power up</p>
-            </div> --}}
+                <p class="text-gray-700">Kustomisasi kode ruangan</p>
+            </div>
         </div>
 
         {{-- Kontak --}}
