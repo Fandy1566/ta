@@ -42,9 +42,17 @@ class GameRoomController extends Controller
 
     public function finished($id)
     {
-        return view('page.gameRoom.finished');
+        $userId = auth()->id();
+    
+        // Cek apakah user pernah bermain di room ini
+        $gameRoomUser = GameRoomUser::where('game_room_id', $id)
+            ->where('user_id', $userId)
+            ->first();
+    
+        return view('page.gameRoom.finished', [
+            'score' => $gameRoomUser?->score,
+        ]);
     }
-
     public function create()
     {
         return view('page.gameRoom.create');

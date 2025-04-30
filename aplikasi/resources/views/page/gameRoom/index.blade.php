@@ -44,20 +44,34 @@
 
         <hr class="border-gray-300">
 
-        {{-- Menu Ranking --}}
         <div>
-            <div class="flex justify-between mb-2">
-                <button class="flex-grow bg-gray-300 hover:bg-gray-400 text-sm font-medium py-1 rounded-l-md">Ranking</button>
-                <button class="flex-grow bg-white hover:bg-gray-100 border border-l-0 border-gray-300 text-sm font-medium py-1 rounded-r-md">Pemain</button>
+            <div class="flex justify-between mb-3">
+                <button id="btn-ranking" class="flex-grow bg-blue-600 text-white text-sm font-medium py-1 rounded-l-md">Ranking</button>
+                <button id="btn-players" class="flex-grow bg-white text-blue-600 border border-l-0 border-blue-600 text-sm font-medium py-1 rounded-r-md">Pemain</button>
             </div>
 
-            <div class="space-y-2">
+            {{-- Ranking List --}}
+            <div id="ranking-tab" class="space-y-2">
                 @foreach ($players->sortByDesc('score') as $player)
                     <div class="flex justify-between items-center bg-gray-100 border rounded px-3 py-2">
                         <span class="font-medium text-gray-700 truncate">{{ $player->user->name }}</span>
                         <span class="text-sm text-gray-600">{{ $player->score }} pts</span>
                     </div>
                 @endforeach
+            </div>
+
+            {{-- Player List with Search --}}
+            <div id="players-tab" class="space-y-2 hidden">
+                <input type="text" id="player-search" placeholder="Cari pemain..." class="w-full px-3 py-2 border rounded-md text-sm">
+                
+                <div id="players-list" class="space-y-2">
+                    @foreach ($players->sortBy(fn($a, $b) => strcmp($a->user->name, $b->user->name)) as $player)
+                        <div class="player-item flex justify-between items-center bg-gray-50 border rounded px-3 py-2">
+                            <span class="font-medium text-gray-700 truncate">{{ $player->user->name }}</span>
+                            <span class="text-sm text-gray-500">{{ $player->user->email }}</span>
+                        </div>
+                    @endforeach
+                </div>
             </div>
         </div>
     </div>
@@ -110,5 +124,44 @@
     }
 
     document.addEventListener('DOMContentLoaded', main);
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const btnRanking = document.getElementById('btn-ranking');
+        const btnPlayers = document.getElementById('btn-players');
+        const tabRanking = document.getElementById('ranking-tab');
+        const tabPlayers = document.getElementById('players-tab');
+        const searchInput = document.getElementById('player-search');
+
+        btnRanking.addEventListener('click', () => {
+            btnRanking.classList.add('bg-blue-600', 'text-white');
+            btnRanking.classList.remove('bg-white', 'text-blue-600');
+
+            btnPlayers.classList.remove('bg-blue-600', 'text-white');
+            btnPlayers.classList.add('bg-white', 'text-blue-600');
+
+            tabRanking.classList.remove('hidden');
+            tabPlayers.classList.add('hidden');
+        });
+
+        btnPlayers.addEventListener('click', () => {
+            btnPlayers.classList.add('bg-blue-600', 'text-white');
+            btnPlayers.classList.remove('bg-white', 'text-blue-600');
+
+            btnRanking.classList.remove('bg-blue-600', 'text-white');
+            btnRanking.classList.add('bg-white', 'text-blue-600');
+
+            tabRanking.classList.add('hidden');
+            tabPlayers.classList.remove('hidden');
+        });
+
+        searchInput.addEventListener('input', () => {
+            const keyword = searchInput.value.toLowerCase();
+            document.querySelectorAll('#players-list .player-item').forEach(item => {
+                const name = item.textContent.toLowerCase();
+                item.style.display = name.includes(keyword) ? 'flex' : 'none';
+            });
+        });
+    });
+
 </script>
 @endsection
