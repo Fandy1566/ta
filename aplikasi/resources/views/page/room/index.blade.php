@@ -14,7 +14,7 @@
                 @foreach ($hostedRooms as $room)
                     <div class="p-4 bg-gray-50 border rounded-md shadow-sm">
                         <h3 class="font-bold text-lg">{{ $room->name }}</h3>
-                        <p class="text-sm text-gray-600">Kode: <span class="font-mono">{{ $room->room_code }}</span></p>
+                        <p class="text-sm text-gray-600">Kode: <span class="font-mono">{{ $room->id }}</span></p>
                         <p class="text-sm text-gray-600">Status: {{ ucfirst($room->status) }}</p>
                         <a href="{{ route('gameRoom.host', $room->id) }}" class="mt-3 inline-block bg-indigo-500 text-white text-sm px-4 py-2 rounded hover:bg-indigo-600">
                             Kelola Room
@@ -44,8 +44,8 @@
                     @foreach ($waitingRooms as $room)
                         <div class="p-4 bg-gray-50 border rounded-md shadow-sm">
                             <h4 class="font-bold text-lg">{{ $room->name }}</h4>
-                            <p class="text-sm text-gray-600">Kode: <span class="font-mono">{{ $room->room_code }}</span></p>
-                            <a href="{{ route('gameRoom.join', $room->room_code) }}" class="mt-3 inline-block bg-yellow-500 text-white text-sm px-4 py-2 rounded hover:bg-yellow-600">
+                            <p class="text-sm text-gray-600">Kode: <span class="font-mono">{{ $room->id }}</span></p>
+                            <a href="{{ route('gameRoom.join', $room->id) }}" class="mt-3 inline-block bg-yellow-500 text-white text-sm px-4 py-2 rounded hover:bg-yellow-600">
                                 Masuk
                             </a>
                         </div>
@@ -62,8 +62,8 @@
                     @foreach ($activeRooms as $room)
                         <div class="p-4 bg-gray-50 border rounded-md shadow-sm">
                             <h4 class="font-bold text-lg">{{ $room->name }}</h4>
-                            <p class="text-sm text-gray-600">Kode: <span class="font-mono">{{ $room->room_code }}</span></p>
-                            <a href="{{ route('gameRoom.join', $room->room_code) }}" class="mt-3 inline-block bg-green-500 text-white text-sm px-4 py-2 rounded hover:bg-green-600">
+                            <p class="text-sm text-gray-600">Kode: <span class="font-mono">{{ $room->id }}</span></p>
+                            <a href="{{ route('gameRoom.join', $room->id) }}" class="mt-3 inline-block bg-green-500 text-white text-sm px-4 py-2 rounded hover:bg-green-600">
                                 Masuk
                             </a>
                         </div>
@@ -80,7 +80,7 @@
                     @foreach ($finishedRooms as $room)
                         <div class="p-4 bg-gray-50 border rounded-md shadow-sm">
                             <h4 class="font-bold text-lg">{{ $room->name }}</h4>
-                            <p class="text-sm text-gray-600">Kode: <span class="font-mono">{{ $room->room_code }}</span></p>
+                            <p class="text-sm text-gray-600">Kode: <span class="font-mono">{{ $room->id }}</span></p>
                             <p class="mt-2 text-sm text-gray-500 italic">Room telah selesai</p>
                         </div>
                     @endforeach
@@ -110,11 +110,11 @@
             @forelse ($publicRooms as $room)
                 <div class="p-4 bg-gray-50 border rounded-md shadow-sm">
                     <h3 class="font-bold text-lg">{{ $room->name }}</h3>
-                    <p class="text-sm text-gray-600">Kode: <span class="font-mono">{{ $room->room_code }}</span></p>
+                    <p class="text-sm text-gray-600">Kode: <span class="font-mono">{{ $room->id }}</span></p>
                     <p class="text-sm text-gray-600">Pemain: {{ $room->current_players }}/{{ $room->max_players }}</p>
                     <p class="text-sm text-gray-600">Status: {{ ucfirst($room->status) }}</p>
 
-                    <a href="{{ route('gameRoom.join', $room->room_code) }}" class="mt-3 inline-block bg-green-500 text-white text-sm px-4 py-2 rounded hover:bg-green-600">
+                    <a href="{{ route('gameRoom.join', $room->id) }}" class="mt-3 inline-block bg-green-500 text-white text-sm px-4 py-2 rounded hover:bg-green-600">
                         Gabung
                     </a>
                 </div>

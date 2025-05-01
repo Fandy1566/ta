@@ -60,6 +60,9 @@ Route::middleware('auth')->group(function () {
 
     // ==================== API ========================
 
+    Route::post('/game/updateScore', [GameRoomController::class, 'updateScore'])->name('gameRoom.updateScore');
+
+
     // Route::middleware('auth')->group(function () {    
     Route::get('/game-rooms/{id}/players', [APIGameRoomController::class, 'getPlayers']);
     Route::get('/game-room/{id}/status', [GameRoomController::class, 'status'])->name('gameRoom.status');
