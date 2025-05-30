@@ -58,7 +58,6 @@
                     canvas.width = canvasWidth;
                     canvas.height = canvasHeight;
 
-                    // Sesuaikan posisi canvas agar tengah & overlay tepat
                     canvas.style.width = canvasWidth + 'px';
                     canvas.style.height = canvasHeight + 'px';
                     canvas.style.left = ((video.parentElement.clientWidth - canvasWidth) / 2) + 'px';
