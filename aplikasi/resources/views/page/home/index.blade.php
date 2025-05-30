@@ -25,6 +25,11 @@
     {{-- Bagian untuk Membuat Room --}}
     <div class="flex gap-8 mt-8">
         <div class="px-8 py-6 bg-white shadow-lg rounded-md w-full sm:w-80 flex flex-col items-center justify-center gap-4">
+            <p class="text-xl font-semibold text-gray-800">Mau test aplikasi?</p>
+            <a href="{{ route('test.index') }}" class="bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600 transition duration-200">Klik disini</a>
+        </div>
+
+        <div class="px-8 py-6 bg-white shadow-lg rounded-md w-full sm:w-80 flex flex-col items-center justify-center gap-4">
             <p class="text-xl font-semibold text-gray-800">Belum ada room?</p>
             <a href="{{ route('gameRoom.create') }}" class="bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600 transition duration-200">Buat Room</a>
         </div>
