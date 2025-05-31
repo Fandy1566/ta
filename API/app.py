@@ -1,3 +1,6 @@
+# .\env\Scripts\Activate
+# python app.py
+
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from ultralytics import YOLO
