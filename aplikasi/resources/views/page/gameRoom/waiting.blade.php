@@ -14,7 +14,7 @@
     </div>
 
     {{-- List Pemain --}}
-    <div class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-4 w-fit mx-auto">
+    <div class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-4 w-fit mx-auto" id="player-list">
         @forelse ($players as $player)
             <div class="flex flex-col items-center">
                 <div class="w-[60px] h-[60px] bg-green-200 flex items-center justify-center rounded-full text-gray-700 text-sm font-semibold shadow-sm">
@@ -41,14 +41,61 @@
 
 <script>
     setInterval(function () {
+        getRoomStatus();
+        getPlayerInRoom();
+    }, 3000); // Cek tiap 3 detik
+
+    function getRoomStatus() {
         fetch("{{ route('gameRoom.status', $room->id) }}")
             .then(response => response.json())
             .then(data => {
+                // console.log(data);
                 if (data.status === 'active') {
-                    window.location.href = "{{ route('gameRoom.index', $room->id) }}";
+                    redirectToGame()
                 }
             })
             .catch(error => console.error('Error:', error));
-    }, 3000); // Cek tiap 3 detik
+    }
+
+    function redirectToGame() {
+        window.location.href = "{{ route('gameRoom.index', $room->id) }}";
+    }
+
+    function getPlayerInRoom() {
+        fetch("{{ route('gameRoom.getPlayers', $room->id) }}")
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                renderPlayerList(data);
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    function renderPlayerList(data) {
+        const playerList = document.getElementById('player-list');
+        playerList.innerHTML = ''; // Kosongkan daftar lama
+
+        if (!data || data.length === 0) {
+            playerList.innerHTML = `
+                <p class="col-span-full text-gray-500">Belum ada pemain bergabung.</p>
+            `;
+            return;
+        }
+
+        data.players.forEach(player => {
+            const initial = player.name.substring(0, 2).toUpperCase();
+            const playerHTML = `
+                <div class="flex flex-col items-center">
+                    <div class="w-[60px] h-[60px] bg-green-200 flex items-center justify-center rounded-full text-gray-700 text-sm font-semibold shadow-sm">
+                        ${initial}
+                    </div>
+                    <span class="mt-1 text-xs text-gray-700 text-center w-[70px] truncate">
+                        ${player.name}
+                    </span>
+                </div>
+            `;
+            playerList.insertAdjacentHTML('beforeend', playerHTML);
+        });
+    }
 </script>
 @endsection

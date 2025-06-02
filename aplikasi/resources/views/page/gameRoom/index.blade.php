@@ -88,7 +88,7 @@
     const questions = @json($questions);
     let currentQuestionIndex = {{$player->correct + $player->wrong}};
     let currentCharIndex = 0;
-    let timeLeft = questions[currentQuestionIndex].time_limit;
+    let timeLeft = questions[currentQuestionIndex]?.time_limit;
     const timerElement = document.getElementById('timer-span');
     const wordDisplay = document.getElementById('word-display');
 
@@ -170,16 +170,20 @@
             });
 
             if (!response.ok) {
-                throw new Error('Failed to update answer status');
+                markAnswer(isCorrect)
+                throw new Error('Failed to update answer status, retrying');
             }
 
             const data = await response.json();
+            fetchAndRenderPlayers();
             console.log(`Answer marked as ${isCorrect ? 'correct' : 'wrong'}`, data);
         } catch (error) {
+            markAnswer(isCorrect)
             console.error('Error marking answer:', error);
             alert('Terjadi kesalahan saat memperbarui status jawaban. Silakan coba lagi.');
         }
     }
+
     function displayWord() {
         if (currentQuestionIndex >= questions.length) {
             document.getElementById('word-display').innerHTML = "<p>Harap tunggu hingga semua pemain berhasil menjawab soal.</p>";
@@ -286,15 +290,64 @@
         document.getElementById('debug-correct').addEventListener('click', simulateCorrectGesture);
     });
 
-    setInterval(function () {
+    async function fetchAndRenderPlayers() {
+        try {
+            const response = await fetch("{{ route('gameRoom.getPlayers', $room->id) }}");
+            if (!response.ok) throw new Error("Gagal mengambil data pemain");
+
+            const data = await response.json();
+            const players = data.players;
+
+            // Render Ranking
+            const rankingTab = document.getElementById('ranking-tab');
+            rankingTab.innerHTML = '';
+            players.sort((a, b) => b.score - a.score).forEach(player => {
+                const div = document.createElement('div');
+                div.className = 'flex justify-between items-center bg-gray-100 border rounded px-3 py-2';
+                div.innerHTML = `
+                    <span class="font-medium text-gray-700 truncate">${player.name}</span>
+                    <span class="text-sm text-gray-600">${player.score} pts</span>
+                `;
+                rankingTab.appendChild(div);
+            });
+
+            // Render Players
+            const playersList = document.getElementById('players-list');
+            playersList.innerHTML = '';
+            players.sort((a, b) => a.user.name.localeCompare(b.user.name)).forEach(player => {
+                const div = document.createElement('div');
+                div.className = 'player-item flex justify-between items-center bg-gray-50 border rounded px-3 py-2';
+                div.innerHTML = `
+                    <span class="font-medium text-gray-700 truncate">${player.name}</span>
+                    <span class="text-sm text-gray-500">${player.email}</span>
+                `;
+                playersList.appendChild(div);
+            });
+
+        } catch (error) {
+            console.error('❌ Gagal memuat pemain:', error);
+        }
+    }
+
+    function getRoomStatus() {
         fetch("{{ route('gameRoom.status', $room->id) }}")
             .then(response => response.json())
             .then(data => {
+                // console.log(data);
                 if (data.status === 'finished') {
-                    window.location.href = "{{ route('gameRoom.finished', $room->id) }}";
+                    redirectToFinish()
                 }
             })
             .catch(error => console.error('Error:', error));
+    }
+
+    function redirectToFinish() {
+        window.location.href = "{{ route('gameRoom.finished', $room->id) }}";
+    }
+
+    setInterval(function () {
+        getRoomStatus();
+        fetchAndRenderPlayers();
     }, 3000);
 
     // Deteksi
@@ -332,7 +385,7 @@
                     lastDetections = await response.json();
                 }
             } catch (error) {
-                console.error("Deteksi gagal:", error);
+                // console.error("Deteksi gagal:", error);
             } finally {
                 isFetching = false;
             }

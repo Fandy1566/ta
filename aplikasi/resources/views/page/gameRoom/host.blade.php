@@ -160,35 +160,55 @@
 </div>
 
 <script>
-    function fetchPlayers() {
-        const roomId = {{ $room->id }};
-        fetch(`/game-room/${roomId}/players`)
-            .then(response => response.json())
-            .then(data => {
-                const playersTableBody = document.querySelector('#players-table tbody');
-              playersTableBody.innerHTML = '';
-  
-                data.players.forEach(player => {
-                    const row = document.createElement('tr');
-                    row.classList.add('border-t');
+function fetchAndRenderPlayers() {
+    fetch("{{ route('gameRoom.getPlayers', $room->id) }}")
+        .then(response => response.json())
+        .then(data => {
+            console.log(data);
 
-                    const nameCell = document.createElement('td');
-                    nameCell.classList.add('py-2', 'px-4');
-                    nameCell.textContent = player.name;
+            const playersTableBody = document.querySelector('#players-table tbody');
+            playersTableBody.innerHTML = '';
 
-                    const scoreCell = document.createElement('td');
-                    scoreCell.classList.add('py-2', 'px-4');
-                    scoreCell.textContent = player.score || 0;
+            if (!Array.isArray(data.players) || data.players.length === 0) {
+                const emptyRow = document.createElement('tr');
+                const emptyCell = document.createElement('td');
+                emptyCell.setAttribute('colspan', 3);
+                emptyCell.classList.add('py-4', 'text-center', 'text-gray-500');
+                emptyCell.textContent = 'Belum ada pemain.';
+                emptyRow.appendChild(emptyCell);
+                playersTableBody.appendChild(emptyRow);
+                return;
+            }
 
-                    row.appendChild(nameCell);
-                    row.appendChild(scoreCell);
+            data.players.forEach(player => {
+                const row = document.createElement('tr');
+                row.classList.add('border-t');
 
-                    playersTableBody.appendChild(row);
-                });
+                const nameCell = document.createElement('td');
+                nameCell.classList.add('py-2', 'px-4');
+                nameCell.textContent = player.name;
+
+                const scoreCell = document.createElement('td');
+                scoreCell.classList.add('py-2', 'px-4');
+                scoreCell.textContent = player.score || 0;
+
+                const helpCell = document.createElement('td');
+                helpCell.classList.add('py-2', 'px-4');
+                helpCell.innerHTML = player.help ? 
+                    `<span class="text-red-500 font-semibold">Ya</span>` : 
+                    `<span class="text-gray-400">-</span>`;
+
+                row.appendChild(nameCell);
+                row.appendChild(scoreCell);
+                row.appendChild(helpCell);
+
+                playersTableBody.appendChild(row);
             });
-    }
+        });
+}
 
-    setInterval(fetchPlayers, 5000);
+
+    setInterval(fetchAndRenderPlayers, 2000);
 </script>
 
 @endsection
