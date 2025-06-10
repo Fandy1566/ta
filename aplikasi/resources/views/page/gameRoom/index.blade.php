@@ -249,7 +249,7 @@
         markAnswer(true);
         currentQuestionIndex++;
 
-        timeLeft = questions[currentQuestionIndex].time_limit;
+        timeLeft = questions[currentQuestionIndex]?.time_limit;
         startTimer();
         displayWord();
     }
