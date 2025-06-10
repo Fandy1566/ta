@@ -1,0 +1,25 @@
+{
+  "name": "ta",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "npm --prefix ./aplikasi run dev",
+    "build": "npm --prefix ./aplikasi run build",
+    "py": ".\\API\\env\\Scripts\\python.exe .\\API\\app.py",
+    "all": "concurrently \"npm run dev\" \"npm run py\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Fandy1566/ta.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Fandy1566/ta/issues"
+  },
+  "homepage": "https://github.com/Fandy1566/ta#readme",
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}

@@ -62,12 +62,13 @@ Route::middleware('auth')->group(function () {
 
     // ==================== API ========================
 
-    Route::post('/game/updateScore', [GameRoomController::class, 'updateScore'])->name('gameRoom.updateScore');
+    Route::post('/game/updateScore', [APIGameRoomController::class, 'updateScore'])->name('gameRoom.updateScore');
 
 
     // Route::middleware('auth')->group(function () {    
     Route::get('/game-room/{id}/players', [APIGameRoomController::class, 'getPlayers'])->name('gameRoom.getPlayers');
-    Route::get('/game-room/{id}/status', [GameRoomController::class, 'status'])->name('gameRoom.status');
+    Route::get('/game-room/{id}/status', [APIGameRoomController::class, 'status'])->name('gameRoom.status');
+    Route::get('/game-room/{id}/help', [APIGameRoomController::class, 'updateHelp'])->name('gameRoom.help');
 
     // });
     

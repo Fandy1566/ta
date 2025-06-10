@@ -25,8 +25,6 @@ class GameRoomController extends Controller
             ->get();
     
         $questions = $room->questions;
-
-        // dd($questions);
     
         return view('page.gameRoom.index', [
             'room' => $room,
@@ -48,7 +46,6 @@ class GameRoomController extends Controller
     {
         $userId = auth()->id();
     
-        // Cek apakah user pernah bermain di room ini
         $gameRoomUser = GameRoomUser::where('game_room_id', $id)
             ->where('user_id', $userId)
             ->first();
@@ -136,18 +133,6 @@ class GameRoomController extends Controller
         } while (GameRoom::where('room_code', $randomString)->exists());
 
         return $randomString;
-    }
-
-    public function show($id)
-    {
-        $room = GameRoom::findOrFail($id);
-        return view('game_rooms.show', compact('room'));
-    }
-
-    public function edit($id)
-    {
-        $room = GameRoom::findOrFail($id);
-        return view('game_rooms.edit', compact('room'));
     }
 
     public function update(Request $request, $id)
@@ -261,36 +246,6 @@ class GameRoomController extends Controller
         return redirect()->back()->with('success', 'Permainan telah dimulai!');
     }
 
-    public function status($id)
-    {
-        $room = GameRoom::findOrFail($id);
-        return response()->json([
-            'status' => $room->status
-        ]);
-    }
-
-    public function updateProgress(Request $request)
-    {
-        $request->validate([
-            'question_index' => 'required|integer',
-            'score' => 'required|integer',
-        ]);
-    
-        session(['current_question_index' => $request->question_index]);
-
-        $player = GameRoomUser::where('game_room_id', $request->game_id)
-                                          ->where('user_id', auth()->id())
-                                          ->first();
-    
-        if ($player) {
-            $player->score += $request->score;
-            $player->save();
-        }
-    
-        return response()->json(['status' => 'ok']);
-    }
-
-
     public function finishGame($id)
     {
         $room = GameRoom::findOrFail($id);
@@ -303,39 +258,6 @@ class GameRoomController extends Controller
         $room->save();
 
         return redirect()->route('gameRoom.host', $room->id)->with('success', 'Game telah diselesaikan.');
-    }
-
-    // function utk in-game
-    public function updateScore(Request $request)
-    {
-        $player = GameRoomUser::where(
-            'user_id', $request->user_id,
-        )->where('game_room_id', $request->game_room_id)->first();
-        $current_question = $player->correct + $player->wrong;
-        $playersWithSameAnswers = GameRoomUser::where('game_room_id', $request->game_room_id)
-            ->whereRaw('(correct + wrong) = ?', [$current_question])
-            ->get();
-        $base_score = 1000;
-        $player->score += ($base_score / (count($playersWithSameAnswers)));
-        if ($request->correct) {
-            $player->correct += 1;
-        } else {
-            $player->wrong += 1;
-        }
-        $player->save();
-
-        return response()->json(['message' => 'Answer status updated']);
-    }
-
-    public function updateHelp(Request $request)
-    {
-        $player = GameRoomUser::where(
-            'user_id', $request->user_id,
-        )->where('game_room_id', $request->game_room_id)->first();
-        $player->help = !$player->help;
-        $player->save();
-
-        return response()->json(['message' => 'Help request logged']);
     }
 
 }

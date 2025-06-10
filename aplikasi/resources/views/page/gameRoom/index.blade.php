@@ -16,10 +16,10 @@
 
         {{-- Tombol kontrol bawah --}}
         <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-4 bg-white/80 backdrop-blur-md p-2 rounded-full shadow-lg z-20">
-            <button class="w-12 h-12 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-bold">✋</button>
-            <button class="w-12 h-12 rounded-full bg-green-600 hover:bg-green-700 text-white font-bold">💡</button>
-            <button class="w-12 h-12 rounded-full bg-red-600 hover:bg-red-700 text-white font-bold">⏻</button>
-            <button id="debug-correct" class="w-12 h-12 rounded-full bg-yellow-500 hover:bg-yellow-600 text-white font-bold">🐞</button>
+            <button type="button" id="helpBtn" class="w-12 h-12 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-bold">✋</button>
+            <button type="button" id="hintBtn" class="w-12 h-12 rounded-full bg-green-600 hover:bg-green-700 text-white font-bold">💡</button>
+            <button type="button" id="exitBtn" class="w-12 h-12 rounded-full bg-red-600 hover:bg-red-700 text-white font-bold">⏻</button>
+            {{-- <button id="debug-correct" class="w-12 h-12 rounded-full bg-yellow-500 hover:bg-yellow-600 text-white font-bold">🐞</button> --}}
         </div>
 
         {{-- Timer --}}
@@ -82,6 +82,31 @@
             </div>
         </div>
     </div>
+
+    {{-- Modal --}}
+    <div id="helpModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black bg-opacity-50">
+        <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
+            <h2 class="text-lg font-semibold mb-4">Konfirmasi Bantuan</h2>
+            <p class="mb-6">Apakah kamu yakin ingin meminta bantuan?</p>
+            <div class="flex justify-end space-x-2">
+            <button id="cancelHelpBtn" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded">Batal</button>
+            <button id="confirmHelpBtn" class="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded">Ya, Minta Bantuan</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="hintModal" class="modal hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-lg p-4 max-w-lg">
+            <div class="flex justify-between items-center mb-2">
+                <h2 class="text-lg font-semibold">Petunjuk Bahasa Isyarat</h2>
+                <button id="closeHint" class="text-gray-600 hover:text-gray-800 text-xl">&times;</button>
+            </div>
+            <img src="{{ asset('BISINDO/bisindo.jpg') }}" alt="Gambar Bahasa Isyarat BISINDO" class="w-full h-auto rounded" />
+        </div>
+    </div>
+
+
+
 </div>
 
 <script>
@@ -350,6 +375,69 @@
         fetchAndRenderPlayers();
     }, 3000);
 
+    const helpBtn = document.getElementById('helpBtn');
+    const helpModal = document.getElementById('helpModal');
+    const cancelHelpBtn = document.getElementById('cancelHelpBtn');
+    const confirmHelpBtn = document.getElementById('confirmHelpBtn');
+
+    let helpUrl = "";
+
+    helpBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        helpUrl = `/game-room/{{$room->id}}/help?user_id={{Auth::id()}}&game_room_id={{$room->id}}`;
+        helpModal.classList.remove('hidden');
+        helpModal.classList.add('flex');
+    });
+
+    cancelHelpBtn.addEventListener('click', () => {
+        helpModal.classList.remove('flex');
+        helpModal.classList.add('hidden');
+    });
+
+    confirmHelpBtn.addEventListener('click', async () => {
+        helpModal.classList.remove('flex');
+        helpModal.classList.add('hidden');
+
+        try {
+            const response = await fetch(helpUrl);
+            if (response.ok) {
+                const data = await response.json();
+                console.log('berhasil meminta bantuan');
+            } else {
+                console.log('gagal meminta bantuan');
+            }
+        } catch (error) {
+            console.error("Gagal:", error);
+
+        }
+    });
+
+    const hintBtn = document.getElementById('hintBtn');
+    const hintModal = document.getElementById('hintModal');
+    const closeHint = document.getElementById('closeHint');
+
+    hintBtn.addEventListener('click', () => {
+        hintModal.classList.remove('hidden');
+    });
+
+    closeHint.addEventListener('click', () => {
+        hintModal.classList.add('hidden');
+    });
+
+    hintModal.addEventListener('click', (e) => {
+        if (e.target === hintModal) {
+            hintModal.classList.add('hidden');
+        }
+    });
+
+    document.getElementById('exitBtn').addEventListener('click', () => {
+        event.preventDefault(); 
+        const confirmExit = confirm("Apakah kamu yakin ingin keluar dari permainan?");
+        if (confirmExit) {
+            window.location.href = "/"; 
+        }
+    });
+
     // Deteksi
 
     async function startDetection(video, canvas) {
@@ -383,19 +471,23 @@
 
                 if (response.ok) {
                     lastDetections = await response.json();
+                    console.log(lastDetections);
+                    
                 }
             } catch (error) {
-                // console.error("Deteksi gagal:", error);
+                console.error("Deteksi gagal:", error);
             } finally {
                 isFetching = false;
             }
         }
 
-        setInterval(fetchDetection, 100);
+        setInterval(fetchDetection, 1000);
 
         function renderLoop() {
             context.clearRect(0, 0, canvas.width, canvas.height);
             context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            // console.log(context, lastDetections, canvas.width, canvas.height, SNAPSHOT_WIDTH, SNAPSHOT_HEIGHT);
+            
             drawDetections(context, lastDetections, canvas.width, canvas.height, SNAPSHOT_WIDTH, SNAPSHOT_HEIGHT);
             requestAnimationFrame(renderLoop);
         }
@@ -417,6 +509,7 @@
         if (currentQuestionIndex >= questions.length) return;
         const currentWord = questions[currentQuestionIndex].question_text.toUpperCase();
         const targetChar = currentWord[currentCharIndex];
+        
 
         detections.forEach(d => {
             const [x1, y1, x2, y2] = d.bbox;

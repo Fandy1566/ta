@@ -28,4 +28,65 @@ class APIGameRoomController extends Controller
             'players' => $players
         ]);
     }
+
+        public function updateScore(Request $request)
+    {
+        $player = GameRoomUser::where(
+            'user_id', $request->user_id,
+        )->where('game_room_id', $request->game_room_id)->first();
+        $current_question = $player->correct + $player->wrong;
+        $playersWithSameAnswers = GameRoomUser::where('game_room_id', $request->game_room_id)
+            ->whereRaw('(correct + wrong) = ?', [$current_question])
+            ->get();
+        $base_score = 1000;
+        $player->score += ($base_score / (count($playersWithSameAnswers)));
+        if ($request->correct) {
+            $player->correct += 1;
+        } else {
+            $player->wrong += 1;
+        }
+        $player->save();
+
+        return response()->json(['message' => 'Answer status updated']);
+    }
+
+    public function updateHelp(Request $request)
+    {
+        $player = GameRoomUser::where(
+            'user_id', $request->user_id,
+        )->where('game_room_id', $request->game_room_id)->first();
+        $player->help = !$player->help;
+        $player->save();
+
+        return response()->json(['message' => 'Help request logged']);
+    }
+
+        public function status($id)
+    {
+        $room = GameRoom::findOrFail($id);
+        return response()->json([
+            'status' => $room->status
+        ]);
+    }
+
+    public function updateProgress(Request $request)
+    {
+        $request->validate([
+            'question_index' => 'required|integer',
+            'score' => 'required|integer',
+        ]);
+    
+        session(['current_question_index' => $request->question_index]);
+
+        $player = GameRoomUser::where('game_room_id', $request->game_id)
+                                          ->where('user_id', auth()->id())
+                                          ->first();
+    
+        if ($player) {
+            $player->score += $request->score;
+            $player->save();
+        }
+    
+        return response()->json(['status' => 'ok']);
+    }
 }
